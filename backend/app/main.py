@@ -1,14 +1,5 @@
-# from fastapi import FastAPI
 
-# app= FastAPI()
-
-# @app.get("/")
-# def home():
-#     return{
-#         "message":"Business Sales Analytics API is running"
-#     }
-
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
@@ -35,14 +26,59 @@ def home():
     }
 
 
-@app.get("/summary")
-def get_summary():
+# =========================================
+# HELPER FUNCTION
+# =========================================
 
-    total_revenue = float(df["Revenue"].sum())
-    total_cost = float(df["Cost"].sum())
-    total_profit = float(df["Profit"].sum())
-    total_quantity = int(df["Quantity"].sum())
-    total_orders = int(df["Order_ID"].nunique())
+def apply_filters(
+    data,
+    region=None,
+    category=None,
+    product=None
+):
+    filtered_data = data.copy()
+
+    if region:
+        filtered_data = filtered_data[
+            filtered_data["Region"] == region
+        ]
+
+    if category:
+        filtered_data = filtered_data[
+            filtered_data["Category"] == category
+        ]
+
+    if product:
+        filtered_data = filtered_data[
+            filtered_data["Product"] == product
+        ]
+
+    return filtered_data
+
+
+# =========================================
+# SUMMARY
+# =========================================
+
+@app.get("/summary")
+def get_summary(
+    region: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    product: str | None = Query(default=None)
+):
+
+    filtered_df = apply_filters(
+        df,
+        region,
+        category,
+        product
+    )
+
+    total_revenue = float(filtered_df["Revenue"].sum())
+    total_cost = float(filtered_df["Cost"].sum())
+    total_profit = float(filtered_df["Profit"].sum())
+    total_quantity = int(filtered_df["Quantity"].sum())
+    total_orders = int(filtered_df["Order_ID"].nunique())
 
     return {
         "total_revenue": total_revenue,
@@ -52,44 +88,110 @@ def get_summary():
         "total_orders": total_orders
     }
 
+
+# =========================================
+# PRODUCTS
+# =========================================
+
 @app.get("/products")
-def get_products():
+def get_products(
+    region: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    product: str | None = Query(default=None)
+):
+
+    filtered_df = apply_filters(
+        df,
+        region,
+        category,
+        product
+    )
 
     product_data = (
-        df.groupby("Product")[["Quantity", "Revenue", "Profit"]]
+        filtered_df.groupby("Product")[["Quantity", "Revenue", "Profit"]]
         .sum()
         .sort_values("Revenue", ascending=False)
     )
 
     return product_data.reset_index().to_dict(orient="records")
 
+
+# =========================================
+# REGIONS
+# =========================================
+
 @app.get("/regions")
-def get_regions():
+def get_regions(
+    region: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    product: str | None = Query(default=None)
+):
+
+    filtered_df = apply_filters(
+        df,
+        region,
+        category,
+        product
+    )
 
     region_data = (
-        df.groupby("Region")[["Quantity", "Revenue", "Profit"]]
+        filtered_df.groupby("Region")[["Quantity", "Revenue", "Profit"]]
         .sum()
         .sort_values("Revenue", ascending=False)
     )
 
     return region_data.reset_index().to_dict(orient="records")
 
+
+# =========================================
+# CATEGORIES
+# =========================================
+
 @app.get("/categories")
-def get_categories():
+def get_categories(
+    region: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    product: str | None = Query(default=None)
+):
+
+    filtered_df = apply_filters(
+        df,
+        region,
+        category,
+        product
+    )
 
     category_data = (
-        df.groupby("Category")[["Quantity", "Revenue", "Profit"]]
+        filtered_df.groupby("Category")[["Quantity", "Revenue", "Profit"]]
         .sum()
         .sort_values("Revenue", ascending=False)
     )
 
     return category_data.reset_index().to_dict(orient="records")
 
+
+# =========================================
+# MONTHLY REVENUE
+# =========================================
+
 @app.get("/monthly-revenue")
-def get_monthly_revenue():
+def get_monthly_revenue(
+    region: str | None = Query(default=None),
+    category: str | None = Query(default=None),
+    product: str | None = Query(default=None)
+):
+
+    filtered_df = apply_filters(
+        df,
+        region,
+        category,
+        product
+    )
 
     monthly_data = (
-        df.groupby(df["Order_Date"].dt.to_period("M"))["Revenue"]
+        filtered_df.groupby(
+            filtered_df["Order_Date"].dt.to_period("M")
+        )["Revenue"]
         .sum()
     )
 

@@ -23,68 +23,92 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [regions, setRegions] = useState([]);
 
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [
-          summaryResponse,
-          monthlyResponse,
-          productsResponse,
-          categoriesResponse,
-          regionsResponse,
-        ] = await Promise.all([
-          fetch(`${API_URL}/summary`),
-          fetch(`${API_URL}/monthly-revenue`),
-          fetch(`${API_URL}/products`),
-          fetch(`${API_URL}/categories`),
-          fetch(`${API_URL}/regions`),
-        ]);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        if (
-          !summaryResponse.ok ||
-          !monthlyResponse.ok ||
-          !productsResponse.ok ||
-          !categoriesResponse.ok ||
-          !regionsResponse.ok
-        ) {
-          throw new Error("Failed to fetch dashboard data");
-        }
+      const params = new URLSearchParams();
 
-        const [
-          summaryData,
-          monthlyData,
-          productsData,
-          categoriesData,
-          regionsData,
-        ] = await Promise.all([
-          summaryResponse.json(),
-          monthlyResponse.json(),
-          productsResponse.json(),
-          categoriesResponse.json(),
-          regionsResponse.json(),
-        ]);
-
-        setSummary(summaryData);
-        setMonthlyRevenue(monthlyData);
-        setProducts(productsData);
-        setCategories(categoriesData);
-        setRegions(regionsData);
-
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to connect with the backend.");
-        setLoading(false);
+      if (selectedRegion) {
+        params.append("region", selectedRegion);
       }
-    };
 
+      if (selectedCategory) {
+        params.append("category", selectedCategory);
+      }
+
+      if (selectedProduct) {
+        params.append("product", selectedProduct);
+      }
+
+      const query = params.toString();
+      const suffix = query ? `?${query}` : "";
+
+      const [
+        summaryResponse,
+        monthlyResponse,
+        productsResponse,
+        categoriesResponse,
+        regionsResponse,
+      ] = await Promise.all([
+        fetch(`${API_URL}/summary${suffix}`),
+        fetch(`${API_URL}/monthly-revenue${suffix}`),
+        fetch(`${API_URL}/products${suffix}`),
+        fetch(`${API_URL}/categories${suffix}`),
+        fetch(`${API_URL}/regions${suffix}`),
+      ]);
+
+      if (
+        !summaryResponse.ok ||
+        !monthlyResponse.ok ||
+        !productsResponse.ok ||
+        !categoriesResponse.ok ||
+        !regionsResponse.ok
+      ) {
+        throw new Error("Failed to fetch dashboard data");
+      }
+
+      const [
+        summaryData,
+        monthlyData,
+        productsData,
+        categoriesData,
+        regionsData,
+      ] = await Promise.all([
+        summaryResponse.json(),
+        monthlyResponse.json(),
+        productsResponse.json(),
+        categoriesResponse.json(),
+        regionsResponse.json(),
+      ]);
+
+      setSummary(summaryData);
+      setMonthlyRevenue(monthlyData);
+      setProducts(productsData);
+      setCategories(categoriesData);
+      setRegions(regionsData);
+
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to connect with the backend.");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [selectedRegion, selectedCategory, selectedProduct]);
 
-  if (loading) {
+  if (loading && !summary) {
     return (
       <div className="loading-screen">
         <h2>Loading Dashboard...</h2>
@@ -93,7 +117,7 @@ function App() {
     );
   }
 
-  if (error) {
+  if (error && !summary) {
     return (
       <div className="error-screen">
         <h2>Something went wrong</h2>
@@ -105,6 +129,8 @@ function App() {
 
   return (
     <div className="dashboard">
+
+      {/* HEADER */}
       <header className="dashboard-header">
         <div>
           <h1>Business Sales Analytics</h1>
@@ -113,6 +139,79 @@ function App() {
       </header>
 
       <main className="dashboard-content">
+
+        {/* FILTERS */}
+        <section className="filters-card">
+
+          <div className="filters-title">
+            <h2>Dashboard Filters</h2>
+            <p>Filter your sales analytics</p>
+          </div>
+
+          <div className="filters">
+
+            {/* REGION */}
+            <div className="filter-group">
+              <label>Region</label>
+
+              <select
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+              >
+                <option value="">All Regions</option>
+                <option value="North">North</option>
+                <option value="East">East</option>
+                <option value="South">South</option>
+                <option value="West">West</option>
+              </select>
+            </div>
+
+            {/* CATEGORY */}
+            <div className="filter-group">
+              <label>Category</label>
+
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+
+            {/* PRODUCT */}
+            <div className="filter-group">
+              <label>Product</label>
+
+              <select
+                value={selectedProduct}
+                onChange={(e) => setSelectedProduct(e.target.value)}
+              >
+                <option value="">All Products</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Monitor">Monitor</option>
+                <option value="Mouse">Mouse</option>
+                <option value="Headphones">Headphones</option>
+                <option value="Keyboard">Keyboard</option>
+              </select>
+            </div>
+
+            {/* RESET */}
+            <button
+              className="reset-button"
+              onClick={() => {
+                setSelectedRegion("");
+                setSelectedCategory("");
+                setSelectedProduct("");
+              }}
+            >
+              Reset Filters
+            </button>
+
+          </div>
+
+        </section>
 
         {/* KPI CARDS */}
         <section className="stats-grid">
@@ -167,6 +266,7 @@ function App() {
               <Line
                 type="monotone"
                 dataKey="revenue"
+                name="Revenue"
                 stroke="#6366f1"
                 strokeWidth={3}
                 dot={{ r: 5 }}
@@ -178,10 +278,10 @@ function App() {
 
         </section>
 
-        {/* PRODUCT + CATEGORY */}
+        {/* PRODUCTS + CATEGORIES */}
         <section className="charts-grid">
 
-          {/* TOP PRODUCTS */}
+          {/* PRODUCTS */}
           <div className="chart-card">
 
             <div className="chart-header">
@@ -214,7 +314,7 @@ function App() {
 
           </div>
 
-          {/* CATEGORY PERFORMANCE */}
+          {/* CATEGORIES */}
           <div className="chart-card">
 
             <div className="chart-header">
@@ -295,3 +395,4 @@ function App() {
 }
 
 export default App;
+

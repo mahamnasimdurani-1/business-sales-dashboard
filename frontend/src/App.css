@@ -525,3 +525,169 @@ body {
     font-size: 17px;
   }
 }
+
+/* =========================================
+   FILTERS
+========================================= */
+
+.filters-card {
+  margin-bottom: 28px;
+
+  padding: 24px 26px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 41, 59, 0.82),
+      rgba(15, 23, 42, 0.86)
+    );
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.filters-title {
+  margin-bottom: 20px;
+}
+
+.filters-title h2 {
+  color: #f8fafc;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  margin-bottom: 5px;
+}
+
+.filters-title p {
+  color: #64748b;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.filters {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr) auto;
+
+  gap: 16px;
+
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.filter-group label {
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.8px;
+}
+
+.filter-group select {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  color: #f8fafc;
+
+  background: #111827;
+
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  border-radius: 10px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.filter-group select:hover,
+.filter-group select:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.filter-group option {
+  background: #111827;
+
+  color: #ffffff;
+}
+
+.reset-button {
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  border-radius: 10px;
+
+  background: #6366f1;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.reset-button:hover {
+  background: #4f46e5;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 20px rgba(99, 102, 241, 0.25);
+}
+
+/* =========================================
+   FILTER RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reset-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}
+
